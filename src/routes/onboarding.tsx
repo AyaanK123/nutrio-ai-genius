@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Navbar } from "@/components/Navbar";
+import { useState } from "react";
+
+
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -29,6 +32,12 @@ function Field({ icon: Icon, label, children }: { icon: any; label: string; chil
 }
 
 function Onboarding() {
+
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [goal, setGoal] = useState("");
+  const [activity, setActivity] = useState("");
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[image:var(--gradient-soft)]">
@@ -40,12 +49,31 @@ function Onboarding() {
             <p className="mt-2 text-muted-foreground">A few quick details — we'll handle the science.</p>
           </div>
           <form
-            onSubmit={(e) => { e.preventDefault(); navigate({ to: "/dashboard" }); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+
+              const userData = {
+                age,
+                height,
+                weight,
+                goal,
+                activity,
+              };
+              console.log("Saving:", userData);
+              localStorage.setItem("userData", JSON.stringify(userData));
+
+              navigate({ to: "/dashboard" });
+            }}
             className="rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-card)]"
           >
             <div className="grid gap-6 sm:grid-cols-2">
               <Field icon={User} label="Age">
-                <Input type="number" placeholder="28" min={1} required />
+                <Input
+                  type="number"
+                  placeholder="28"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                />
               </Field>
               <Field icon={Users} label="Gender">
                 <Select>
@@ -58,13 +86,23 @@ function Onboarding() {
                 </Select>
               </Field>
               <Field icon={Ruler} label="Height (cm)">
-                <Input type="number" placeholder="175" required />
+                <Input
+                  type="number"
+                  placeholder="175"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                />
               </Field>
               <Field icon={Weight} label="Weight (kg)">
-                <Input type="number" placeholder="70" required />
+                <Input
+                  type="number"
+                  placeholder="70"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                />
               </Field>
               <Field icon={Activity} label="Activity Level">
-                <Select>
+                <Select onValueChange={setActivity}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sedentary">Sedentary</SelectItem>
@@ -74,7 +112,7 @@ function Onboarding() {
                 </Select>
               </Field>
               <Field icon={Target} label="Goal">
-                <Select>
+                <Select onValueChange={setGoal}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="loss">Weight Loss</SelectItem>
@@ -105,3 +143,20 @@ function Onboarding() {
     </div>
   );
 }
+
+
+
+
+// const handleSubmit = () => {
+//   const userData = {
+//     age,
+//     weight,
+//     height,
+//     goal,
+//     activity,
+//   };
+
+//   localStorage.setItem("userData", JSON.stringify(userData));
+
+//   window.location.href = "/dashboard";
+// };

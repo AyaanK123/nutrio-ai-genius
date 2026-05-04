@@ -2,11 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Flame, TrendingDown, Scale, Target } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
+
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — NutriAI" }] }),
   component: Dashboard,
 });
-
+const mockData = {
+  calories: 2200,
+  protein: 120,
+};
 const weightData = [
   { day: "Mon", weight: 72.4 },
   { day: "Tue", weight: 72.1 },
@@ -39,11 +43,40 @@ function Stat({ icon: Icon, label, value, hint }: { icon: any; label: string; va
 }
 
 function Dashboard() {
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  const calculateCalories = () => {
+    const weight = Number(userData.weight);
+    const height = Number(userData.height);
+    const age = Number(userData.age);
+
+    if (!weight || !height || !age) return 0;
+
+    // Simple BMR formula
+    const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+
+    return Math.round(bmr * 1.5); // activity factor
+  };
+
+const calories = calculateCalories();
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Good morning, Alex 👋</h1>
         <p className="text-muted-foreground">Here's your nutrition snapshot for today.</p>
+      </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Good morning, Alex 👋
+        </h1>
+        <p className="text-muted-foreground">
+          Here's your nutrition snapshot for today.
+        </p>
+      </div>
+      <div className="bg-card p-4 rounded-xl">
+        <p>Weight: {userData?.weight || "Not set"}</p>
+        <p>Goal: {userData?.goal || "Not set"}</p>
+        <p>Height: {userData?.height || "Not set"}</p>
+        <p>Age: {userData?.age || "Not set"}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -51,7 +84,7 @@ function Dashboard() {
           <div className="flex items-center gap-2 text-sm opacity-90">
             <Target className="h-4 w-4" /> Daily Calories
           </div>
-          <div className="mt-4 text-5xl font-bold">2,150</div>
+          <div className="mt-4 text-5xl font-bold">{calories}</div>
           <div className="mt-1 text-sm opacity-90">of 2,400 kcal goal</div>
           <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-white/20">
             <div className="h-full rounded-full bg-white" style={{ width: "89%" }} />
