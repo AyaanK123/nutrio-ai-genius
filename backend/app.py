@@ -1,12 +1,23 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
+import google.generativeai as genai
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# 🔑 Your OpenAI API key
-client = OpenAI(api_key="YOUR_KEY")
+# 🔑 Your API key
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+
+print(os.getenv("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 
 @app.route("/")
@@ -32,15 +43,8 @@ def generate_meal_plan():
 
         try:
             # 🤖 Try AI first
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ],
-                timeout=10
-            )
-
-            meal_plan = response.choices[0].message.content
+            response = model.generate_content(prompt)
+            meal_plan = response.text
 
         except Exception as ai_error:
             print("AI ERROR:", str(ai_error))
@@ -63,6 +67,67 @@ Snacks: Fruits and nuts
             "meal_plan": "Error generating meal plan"
         }), 500
 
+
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    try:
+        # 📩 Get frontend JSON
+        data = request.json
+
+        print("Received data:", data)
+
+        user_message = data.get("message", "")
+
+        print("User message:", user_message)
+
+        # 🤖 Build prompt
+        prompt = f"""
+        You are a helpful AI nutritionist.
+
+        User question:
+        {user_message}
+
+        Give short, practical nutrition advice.
+        """
+
+        print("Sending prompt to Gemini...")
+
+        # 🚀 Gemini API call
+        response = model.generate_content(prompt)
+
+        print("Gemini response received")
+
+        print(response)
+
+        # 🧠 Extract text
+        reply = response.text
+
+        print("Final reply:", reply)
+
+        # ✅ Return JSON response
+        return jsonify({
+            "reply": reply
+        })
+
+    except Exception as e:
+        print("CHAT ROUTE ERROR:", str(e))
+
+        fallback_reply = """
+    Vegetarian protein foods include:
+    - Paneer
+    - Tofu
+    - Lentils
+    - Chickpeas
+    - Greek yogurt
+    - Soy chunks
+    - Milk
+    - Nuts and seeds
+    """
+
+        return jsonify({
+            "reply": fallback_reply
+        })
 
 if __name__ == "__main__":
     app.run(debug=True)
