@@ -1,5 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, UtensilsCrossed, User, Leaf, MessageCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  UtensilsCrossed,
+  User,
+  Leaf,
+  MessageCircle,
+  CalendarDays,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +24,7 @@ const items = [
   { title: "Meal Plan", url: "/meal-plan", icon: UtensilsCrossed },
   { title: "AI Chat", url: "/chat", icon: MessageCircle },
   { title: "Profile", url: "/profile", icon: User },
+  {title: "Weekly Planner", url: "/weekly-plan", icon: CalendarDays},
 ];
 
 export function AppSidebar() {

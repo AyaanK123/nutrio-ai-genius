@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Flame, TrendingDown, Scale, Target } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — NutriAI" }] }),
@@ -44,6 +44,32 @@ function Stat({ icon: Icon, label, value, hint }: { icon: any; label: string; va
 
 function Dashboard() {
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+
+  const [macroData, setMacroData] = useState<any>({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+  });
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/calculate-macros", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMacroData(data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
+
   const calculateCalories = () => {
     const weight = Number(userData.weight);
     const height = Number(userData.height);
@@ -61,10 +87,6 @@ const calories = calculateCalories();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Good morning, Alex 👋</h1>
-        <p className="text-muted-foreground">Here's your nutrition snapshot for today.</p>
-      </div>
-      <div>
         <h1 className="text-3xl font-bold tracking-tight">
           Good morning, Alex 👋
         </h1>
@@ -72,6 +94,55 @@ const calories = calculateCalories();
           Here's your nutrition snapshot for today.
         </p>
       </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+
+        <div className="rounded-2xl border bg-card p-5 shadow">
+          <div className="text-sm text-muted-foreground">
+            Calories
+          </div>
+
+          <div className="mt-2 text-3xl font-bold">
+            {macroData.calories}
+          </div>
+
+          <div className="mt-1 text-sm text-muted-foreground">
+            kcal/day
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-5 shadow">
+          <div className="text-sm text-muted-foreground">
+            Protein
+          </div>
+
+          <div className="mt-2 text-3xl font-bold">
+            {macroData.protein}g
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-5 shadow">
+          <div className="text-sm text-muted-foreground">
+            Carbs
+          </div>
+
+          <div className="mt-2 text-3xl font-bold">
+            {macroData.carbs}g
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-5 shadow">
+          <div className="text-sm text-muted-foreground">
+            Fats
+          </div>
+
+          <div className="mt-2 text-3xl font-bold">
+            {macroData.fats}g
+          </div>
+        </div>
+
+      </div>
+
       <div className="bg-card p-4 rounded-xl">
         <p>Weight: {userData?.weight || "Not set"}</p>
         <p>Goal: {userData?.goal || "Not set"}</p>

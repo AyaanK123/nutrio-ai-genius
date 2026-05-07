@@ -1,99 +1,5 @@
-// import { createFileRoute } from "@tanstack/react-router";
-// import { useEffect, useRef, useState } from "react";
-// import { Send, Sparkles, User } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-
-// export const Route = createFileRoute("/_app/chat")({
-//   head: () => ({ meta: [{ title: "AI Chat — NutriAI" }] }),
-//   component: Chat,
-// });
-
-// type Msg = { role: "user" | "ai"; text: string };
-
-// const initial: Msg[] = [
-//   { role: "ai", text: "Hi! I'm your AI nutritionist. Ask me anything about your meals, macros, or goals." },
-//   { role: "user", text: "What should I eat post-workout for muscle gain?" },
-//   { role: "ai", text: "Aim for ~30g protein and 40-60g carbs within 60 minutes. A great option: grilled chicken with rice and steamed veggies, or a protein shake with a banana." },
-// ];
-
-// function Chat() {
-//   const [messages, setMessages] = useState<Msg[]>(initial);
-//   const [input, setInput] = useState("");
-//   const endRef = useRef<HTMLDivElement>(null);
-
-//   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-//   const send = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!input.trim()) return;
-//     const text = input.trim();
-//     setMessages((m) => [...m, { role: "user", text }]);
-//     setInput("");
-//     setTimeout(() => {
-//       setMessages((m) => [...m, { role: "ai", text: "Great question! Based on your profile, I'd recommend balancing lean protein, complex carbs, and healthy fats. Want me to suggest a specific meal?" }]);
-//     }, 700);
-//   };
-
-//   return (
-//     <div className="flex h-[calc(100vh-8rem)] flex-col rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-//       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
-//         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[image:var(--gradient-primary)]">
-//           <Sparkles className="h-5 w-5 text-primary-foreground" />
-//         </div>
-//         <div>
-//           <div className="font-semibold">NutriAI Assistant</div>
-//           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-//             <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Online
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="flex-1 space-y-4 overflow-y-auto p-6">
-//         {messages.map((m, i) => (
-//           <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-//             {m.role === "ai" && (
-//               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-//                 <Sparkles className="h-4 w-4" />
-//               </div>
-//             )}
-//             <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
-//               m.role === "user"
-//                 ? "rounded-br-sm bg-[image:var(--gradient-primary)] text-primary-foreground"
-//                 : "rounded-bl-sm bg-muted text-foreground"
-//             }`}>
-//               {m.text}
-//             </div>
-//             {m.role === "user" && (
-//               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-//                 <User className="h-4 w-4" />
-//               </div>
-//             )}
-//           </div>
-//         ))}
-//         <div ref={endRef} />
-//       </div>
-
-//       <form onSubmit={send} className="flex items-center gap-2 border-t border-border p-4">
-//         <Input
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           placeholder="Ask your nutritionist..."
-//           className="h-11 rounded-xl"
-//         />
-//         <Button type="submit" size="icon" className="h-11 w-11 shrink-0 rounded-xl">
-//           <Send className="h-4 w-4" />
-//         </Button>
-//       </form>
-//     </div>
-//   );
-// }
-
-
-
-
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export const Route = createFileRoute("/_app/chat")({
   component: ChatPage,
@@ -102,10 +8,20 @@ export const Route = createFileRoute("/_app/chat")({
 function ChatPage() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages, loading]);
+
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-
+    setLoading(true);
     // 👤 Add user message
     const userMessage = {
       sender: "user",
@@ -113,6 +29,8 @@ function ChatPage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
+    setLoading(false);
 
     const currentMessage = message;
     setMessage("");
@@ -141,6 +59,7 @@ function ChatPage() {
 
     } catch (err) {
       console.error(err);
+      setLoading(false);
 
       setMessages((prev) => [
         ...prev,
@@ -159,7 +78,7 @@ function ChatPage() {
       </h1>
 
       {/* 💬 Chat messages */}
-      <div className="mb-4 h-[500px] overflow-y-auto rounded-xl border bg-card p-4">
+      <div className="mb-4 h-[500px] overflow-y-auto rounded-2xl border bg-card p-6 shadow">
         {messages.length === 0 && (
           <p className="text-muted-foreground">
             Ask nutrition questions...
@@ -170,15 +89,48 @@ function ChatPage() {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`max-w-[80%] rounded-xl p-3 ${
+              className={`flex ${
                 msg.sender === "user"
-                  ? "ml-auto bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? "justify-end"
+                  : "justify-start"
               }`}
             >
-              {msg.text}
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow ${
+                  msg.sender === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
+              >
+                <div className="mb-1 text-xs opacity-70">
+                  {msg.sender === "user" ? "You" : "NutriAI"}
+                </div>
+
+                <div className="whitespace-pre-wrap">
+                  {msg.text}
+                </div>
+              </div>
             </div>
           ))}
+
+          {loading && (
+            <div className="max-w-[80%] rounded-xl bg-muted p-3">
+              <div className="flex justify-start">
+                <div className="rounded-2xl bg-muted px-4 py-3 shadow">
+                  <div className="mb-1 text-xs opacity-70">
+                    NutriAI
+                  </div>
+
+                  <div className="animate-pulse">
+                    Typing...
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+          <div ref={bottomRef} />
         </div>
       </div>
 
@@ -189,12 +141,19 @@ function ChatPage() {
           placeholder="Ask something..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
           className="flex-1 rounded-xl border bg-background px-4 py-3 outline-none"
         />
 
         <button
+          disabled={loading}
           onClick={sendMessage}
-          className="rounded-xl bg-primary px-6 py-3 text-primary-foreground"
+          className="rounded-xl bg-primary px-6 py-3 text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
           Send
         </button>

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWeeklyPlanRouteImport } from './routes/_app.weekly-plan'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMealPlanRouteImport } from './routes/_app.meal-plan'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWeeklyPlanRoute = AppWeeklyPlanRouteImport.update({
+  id: '/weekly-plan',
+  path: '/weekly-plan',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
+  '/weekly-plan': typeof AppWeeklyPlanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
+  '/weekly-plan': typeof AppWeeklyPlanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/meal-plan': typeof AppMealPlanRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/weekly-plan': typeof AppWeeklyPlanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,8 +96,16 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/meal-plan'
     | '/profile'
+    | '/weekly-plan'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/onboarding' | '/chat' | '/dashboard' | '/meal-plan' | '/profile'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/chat'
+    | '/dashboard'
+    | '/meal-plan'
+    | '/profile'
+    | '/weekly-plan'
   id:
     | '__root__'
     | '/'
@@ -98,6 +115,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/meal-plan'
     | '/_app/profile'
+    | '/_app/weekly-plan'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,6 +146,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/weekly-plan': {
+      id: '/_app/weekly-plan'
+      path: '/weekly-plan'
+      fullPath: '/weekly-plan'
+      preLoaderRoute: typeof AppWeeklyPlanRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/profile': {
       id: '/_app/profile'
@@ -165,6 +190,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppMealPlanRoute: typeof AppMealPlanRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppWeeklyPlanRoute: typeof AppWeeklyPlanRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -172,6 +198,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMealPlanRoute: AppMealPlanRoute,
   AppProfileRoute: AppProfileRoute,
+  AppWeeklyPlanRoute: AppWeeklyPlanRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
