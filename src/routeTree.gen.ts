@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWeeklyPlanRouteImport } from './routes/_app.weekly-plan'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMealPlanRouteImport } from './routes/_app.meal-plan'
+import { Route as AppMacroCalculatorRouteImport } from './routes/_app.macro-calculator'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 
@@ -47,6 +48,11 @@ const AppMealPlanRoute = AppMealPlanRouteImport.update({
   path: '/meal-plan',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMacroCalculatorRoute = AppMacroCalculatorRouteImport.update({
+  id: '/macro-calculator',
+  path: '/macro-calculator',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/chat': typeof AppChatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/macro-calculator': typeof AppMacroCalculatorRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
   '/weekly-plan': typeof AppWeeklyPlanRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/chat': typeof AppChatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/macro-calculator': typeof AppMacroCalculatorRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
   '/weekly-plan': typeof AppWeeklyPlanRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/macro-calculator': typeof AppMacroCalculatorRoute
   '/_app/meal-plan': typeof AppMealPlanRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/weekly-plan': typeof AppWeeklyPlanRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/chat'
     | '/dashboard'
+    | '/macro-calculator'
     | '/meal-plan'
     | '/profile'
     | '/weekly-plan'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/chat'
     | '/dashboard'
+    | '/macro-calculator'
     | '/meal-plan'
     | '/profile'
     | '/weekly-plan'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/_app/chat'
     | '/_app/dashboard'
+    | '/_app/macro-calculator'
     | '/_app/meal-plan'
     | '/_app/profile'
     | '/_app/weekly-plan'
@@ -168,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMealPlanRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/macro-calculator': {
+      id: '/_app/macro-calculator'
+      path: '/macro-calculator'
+      fullPath: '/macro-calculator'
+      preLoaderRoute: typeof AppMacroCalculatorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppMacroCalculatorRoute: typeof AppMacroCalculatorRoute
   AppMealPlanRoute: typeof AppMealPlanRoute
   AppProfileRoute: typeof AppProfileRoute
   AppWeeklyPlanRoute: typeof AppWeeklyPlanRoute
@@ -196,6 +216,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppMacroCalculatorRoute: AppMacroCalculatorRoute,
   AppMealPlanRoute: AppMealPlanRoute,
   AppProfileRoute: AppProfileRoute,
   AppWeeklyPlanRoute: AppWeeklyPlanRoute,

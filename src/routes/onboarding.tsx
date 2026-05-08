@@ -32,7 +32,8 @@ function Field({ icon: Icon, label, children }: { icon: any; label: string; chil
 }
 
 function Onboarding() {
-
+  const [gender, setGender] = useState("");
+  const [dietaryPreference, setDietaryPreference] = useState("");
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -54,15 +55,34 @@ function Onboarding() {
 
               const userData = {
                 age,
+                gender,
                 height,
                 weight,
-                goal,
                 activity,
+                goal,
+                dietaryPreference,
               };
-              console.log("Saving:", userData);
+              console.log("Submitting:", userData);
               localStorage.setItem("userData", JSON.stringify(userData));
 
-              navigate({ to: "/dashboard" });
+              fetch("http://127.0.0.1:5000/save-user", {
+                method: "POST",
+
+                headers: {
+                  "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify(userData),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  console.log(data);
+
+                  navigate({ to: "/dashboard" });
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
             }}
             className="rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-card)]"
           >
@@ -76,7 +96,7 @@ function Onboarding() {
                 />
               </Field>
               <Field icon={Users} label="Gender">
-                <Select>
+                <Select  onValueChange={setGender}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="female">Female</SelectItem>
@@ -123,7 +143,7 @@ function Onboarding() {
               </Field>
               <div className="sm:col-span-2">
                 <Field icon={Apple} label="Dietary Preference">
-                  <Select>
+                  <Select onValueChange={setDietaryPreference}>
                     <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="veg">Vegetarian</SelectItem>
@@ -144,19 +164,3 @@ function Onboarding() {
   );
 }
 
-
-
-
-// const handleSubmit = () => {
-//   const userData = {
-//     age,
-//     weight,
-//     height,
-//     goal,
-//     activity,
-//   };
-
-//   localStorage.setItem("userData", JSON.stringify(userData));
-
-//   window.location.href = "/dashboard";
-// };

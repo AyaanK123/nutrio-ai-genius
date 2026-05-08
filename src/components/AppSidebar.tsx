@@ -6,6 +6,7 @@ import {
   Leaf,
   MessageCircle,
   CalendarDays,
+  Calculator
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,11 @@ const items = [
   { title: "AI Chat", url: "/chat", icon: MessageCircle },
   { title: "Profile", url: "/profile", icon: User },
   {title: "Weekly Planner", url: "/weekly-plan", icon: CalendarDays},
+  {
+    title: "Macro Calculator",
+    url: "/macro-calculator",
+    icon: Calculator,
+  },
 ];
 
 export function AppSidebar() {

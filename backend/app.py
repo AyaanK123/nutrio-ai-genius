@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
+from flask_sqlalchemy import SQLAlchemy
+
 
 import os
 from dotenv import load_dotenv
@@ -8,11 +10,102 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
 
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///nutriai.db"
+db = SQLAlchemy(app)
+
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True
+)
 # 🔑 Your API key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    age = db.Column(db.Integer)
+
+    gender = db.Column(db.String(20))
+
+    height = db.Column(db.Float)
+
+    weight = db.Column(db.Float)
+
+    activity = db.Column(db.String(50))
+
+    goal = db.Column(db.String(50))
+
+    dietary_preference = db.Column(db.String(100))
+
+
+
+@app.route("/save-user", methods=["POST"])
+def save_user():
+    try:
+        data = request.json
+
+        user = User(
+            age=int(data.get("age", 0)),
+
+            gender=data.get("gender"),
+
+            height=float(data.get("height", 0)),
+
+            weight=float(data.get("weight", 0)),
+
+            activity=data.get("activity"),
+
+            goal=data.get("goal"),
+
+            dietary_preference=data.get("dietaryPreference"),
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "User saved successfully"
+        })
+
+    except Exception as e:
+        print("SAVE USER ERROR:", str(e))
+
+        return jsonify({
+            "message": "Error saving user"
+        }), 500
+
+
+@app.route("/users", methods=["GET"])
+def get_users():
+    try:
+        users = User.query.all()
+
+        users_data = []
+
+        for user in users:
+            users_data.append({
+                "id": user.id,
+                "age": user.age,
+                "gender": user.gender,
+                "height": user.height,
+                "weight": user.weight,
+                "activity": user.activity,
+                "goal": user.goal,
+                "dietary_preference": user.dietary_preference,
+            })
+
+        return jsonify(users_data)
+
+    except Exception as e:
+        print("GET USERS ERROR:", str(e))
+
+        return jsonify([]), 500
 
 
 # print(os.getenv("GEMINI_API_KEY"))
@@ -23,6 +116,51 @@ model = genai.GenerativeModel("gemini-2.0-flash")
 @app.route("/")
 def home():
     return "Backend is running!"
+
+
+@app.route("/update-user/<int:user_id>", methods=["PUT"])
+def update_user(user_id):
+    try:
+        user = User.query.get(user_id)
+
+        if not user:
+            return jsonify({
+                "message": "User not found"
+            }), 404
+
+        data = request.json
+
+        user.age = int(data.get("age") or user.age)
+
+        user.gender = data.get("gender") or user.gender
+
+        user.height = float(data.get("height") or user.height)
+
+        user.weight = float(data.get("weight") or user.weight)
+
+        user.activity = data.get("activity") or user.activity
+
+        user.goal = data.get("goal") or user.goal
+
+        user.dietary_preference = (
+            data.get("dietary_preference")
+            or user.dietary_preference
+        )
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "User updated successfully"
+        })
+
+    except Exception as e:
+        print("UPDATE USER ERROR:", str(e))
+
+        return jsonify({
+            "message": "Error updating user"
+        }), 500
+
+
 
 
 @app.route("/generate-meal-plan", methods=["POST"])
@@ -201,9 +339,11 @@ def calculate_macros():
     try:
         data = request.json
 
-        weight = float(data.get("weight", 70))
-        height = float(data.get("height", 170))
-        age = float(data.get("age", 25))
+        weight = float(data.get("weight") or 70)
+
+        height = float(data.get("height") or 170)
+
+        age = float(data.get("age") or 25)
         activity = data.get("activity", "moderate")
         goal = data.get("goal", "maintain")
 
@@ -247,6 +387,9 @@ def calculate_macros():
             "fats": 0,
         }), 500
 
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
