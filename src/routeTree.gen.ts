@@ -9,19 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWeeklyPlanRouteImport } from './routes/_app.weekly-plan'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMealPlanRouteImport } from './routes/_app.meal-plan'
+import { Route as AppMacroHistoryRouteImport } from './routes/_app.macro-history'
 import { Route as AppMacroCalculatorRouteImport } from './routes/_app.macro-calculator'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -48,6 +61,11 @@ const AppMealPlanRoute = AppMealPlanRouteImport.update({
   path: '/meal-plan',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMacroHistoryRoute = AppMacroHistoryRouteImport.update({
+  id: '/macro-history',
+  path: '/macro-history',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMacroCalculatorRoute = AppMacroCalculatorRouteImport.update({
   id: '/macro-calculator',
   path: '/macro-calculator',
@@ -66,20 +84,26 @@ const AppChatRoute = AppChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/chat': typeof AppChatRoute
   '/dashboard': typeof AppDashboardRoute
   '/macro-calculator': typeof AppMacroCalculatorRoute
+  '/macro-history': typeof AppMacroHistoryRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
   '/weekly-plan': typeof AppWeeklyPlanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/chat': typeof AppChatRoute
   '/dashboard': typeof AppDashboardRoute
   '/macro-calculator': typeof AppMacroCalculatorRoute
+  '/macro-history': typeof AppMacroHistoryRoute
   '/meal-plan': typeof AppMealPlanRoute
   '/profile': typeof AppProfileRoute
   '/weekly-plan': typeof AppWeeklyPlanRoute
@@ -88,10 +112,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/macro-calculator': typeof AppMacroCalculatorRoute
+  '/_app/macro-history': typeof AppMacroHistoryRoute
   '/_app/meal-plan': typeof AppMealPlanRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/weekly-plan': typeof AppWeeklyPlanRoute
@@ -100,20 +127,26 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/onboarding'
+    | '/signup'
     | '/chat'
     | '/dashboard'
     | '/macro-calculator'
+    | '/macro-history'
     | '/meal-plan'
     | '/profile'
     | '/weekly-plan'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/onboarding'
+    | '/signup'
     | '/chat'
     | '/dashboard'
     | '/macro-calculator'
+    | '/macro-history'
     | '/meal-plan'
     | '/profile'
     | '/weekly-plan'
@@ -121,10 +154,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/login'
     | '/onboarding'
+    | '/signup'
     | '/_app/chat'
     | '/_app/dashboard'
     | '/_app/macro-calculator'
+    | '/_app/macro-history'
     | '/_app/meal-plan'
     | '/_app/profile'
     | '/_app/weekly-plan'
@@ -133,16 +169,32 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -180,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMealPlanRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/macro-history': {
+      id: '/_app/macro-history'
+      path: '/macro-history'
+      fullPath: '/macro-history'
+      preLoaderRoute: typeof AppMacroHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/macro-calculator': {
       id: '/_app/macro-calculator'
       path: '/macro-calculator'
@@ -208,6 +267,7 @@ interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMacroCalculatorRoute: typeof AppMacroCalculatorRoute
+  AppMacroHistoryRoute: typeof AppMacroHistoryRoute
   AppMealPlanRoute: typeof AppMealPlanRoute
   AppProfileRoute: typeof AppProfileRoute
   AppWeeklyPlanRoute: typeof AppWeeklyPlanRoute
@@ -217,6 +277,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMacroCalculatorRoute: AppMacroCalculatorRoute,
+  AppMacroHistoryRoute: AppMacroHistoryRoute,
   AppMealPlanRoute: AppMealPlanRoute,
   AppProfileRoute: AppProfileRoute,
   AppWeeklyPlanRoute: AppWeeklyPlanRoute,
@@ -227,7 +288,9 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2,7 +2,14 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    jwt_required,
+    get_jwt_identity,
+)
 
 import os
 from dotenv import load_dotenv
@@ -10,6 +17,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
+app.config["JWT_SECRET_KEY"] = "super-secret-key"
+
+bcrypt = Bcrypt(app)
+
+jwt = JWTManager(app)
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///nutriai.db"
@@ -42,6 +55,35 @@ class User(db.Model):
 
     dietary_preference = db.Column(db.String(100))
 
+    email = db.Column(
+        db.String(120),
+        unique=True,
+        nullable=False
+    )
+
+    password = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+
+class MacroHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    calories = db.Column(db.Integer)
+
+    protein = db.Column(db.Integer)
+
+    carbs = db.Column(db.Integer)
+
+    fats = db.Column(db.Integer)
+
+    goal = db.Column(db.String(50))
+
+    created_at = db.Column(
+        db.DateTime,
+        default=db.func.current_timestamp()
+    )
 
 
 @app.route("/save-user", methods=["POST"])
@@ -91,6 +133,8 @@ def get_users():
         for user in users:
             users_data.append({
                 "id": user.id,
+                "email": user.email,
+                "password": user.password,
                 "age": user.age,
                 "gender": user.gender,
                 "height": user.height,
@@ -106,6 +150,61 @@ def get_users():
         print("GET USERS ERROR:", str(e))
 
         return jsonify([]), 500
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    try:
+        data = request.json
+
+        email = data.get("email")
+
+        password = data.get("password")
+
+        # ✅ Check if user already exists
+        existing_user = User.query.filter_by(
+            email=email
+        ).first()
+
+        if existing_user:
+            return jsonify({
+                "message": "User already exists"
+            }), 400
+
+        # 🔒 Hash password
+        hashed_password = bcrypt.generate_password_hash(
+            password
+        ).decode("utf-8")
+
+        # 👤 Create new user
+        user = User(
+            email=email,
+
+            password=hashed_password,
+
+            age=0,
+            gender="",
+            height=0,
+            weight=0,
+            activity="",
+            goal="",
+            dietary_preference="",
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Signup successful"
+        })
+
+    except Exception as e:
+        print("SIGNUP ERROR:", str(e))
+
+        return jsonify({
+            "message": "Signup failed"
+        }), 500
 
 
 # print(os.getenv("GEMINI_API_KEY"))
@@ -163,6 +262,7 @@ def update_user(user_id):
 
 
 
+
 @app.route("/generate-meal-plan", methods=["POST"])
 def generate_meal_plan():
     try:
@@ -203,6 +303,57 @@ Snacks: Fruits and nuts
         print("SERVER ERROR:", str(e))
         return jsonify({
             "meal_plan": "Error generating meal plan"
+        }), 500
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.json
+
+        email = data.get("email")
+
+        password = data.get("password")
+
+        # 🔍 Find user
+        user = User.query.filter_by(
+            email=email
+        ).first()
+
+        if not user:
+            return jsonify({
+                "message": "Invalid email or password"
+            }), 401
+
+        # 🔒 Verify password
+        password_correct = bcrypt.check_password_hash(
+            user.password,
+            password
+        )
+
+        if not password_correct:
+            return jsonify({
+                "message": "Invalid email or password"
+            }), 401
+
+        # 🎟️ Create JWT token
+        access_token = create_access_token(
+            identity=user.id
+        )
+
+        return jsonify({
+            "token": access_token,
+
+            "user_id": user.id,
+
+            "message": "Login successful"
+        })
+
+    except Exception as e:
+        print("LOGIN ERROR:", str(e))
+
+        return jsonify({
+            "message": "Login failed"
         }), 500
 
 
@@ -369,6 +520,24 @@ def calculate_macros():
         protein = weight * 2
         fats = weight * 0.8
         carbs = (calories - (protein * 4 + fats * 9)) / 4
+        
+
+        macro_entry = MacroHistory(
+            calories=round(calories),
+
+            protein=round(protein),
+
+            carbs=round(carbs),
+
+            fats=round(fats),
+
+            goal=goal,
+        )
+
+        db.session.add(macro_entry)
+
+        db.session.commit()
+
 
         return jsonify({
             "calories": round(calories),
@@ -386,6 +555,69 @@ def calculate_macros():
             "carbs": 0,
             "fats": 0,
         }), 500
+
+
+
+@app.route("/macro-history", methods=["GET"])
+def get_macro_history():
+    try:
+        history = MacroHistory.query.all()
+
+        history_data = []
+
+        for entry in history:
+            history_data.append({
+                "id": entry.id,
+
+                "calories": entry.calories,
+
+                "protein": entry.protein,
+
+                "carbs": entry.carbs,
+
+                "fats": entry.fats,
+
+                "goal": entry.goal,
+
+                "created_at": entry.created_at,
+            })
+
+        return jsonify(history_data)
+
+    except Exception as e:
+        print("MACRO HISTORY ERROR:", str(e))
+
+        return jsonify([]), 500
+
+
+
+
+@app.route("/delete-user/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    try:
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({
+                "message": "User not found"
+            }), 404
+
+        db.session.delete(user)
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "User deleted successfully"
+        })
+
+    except Exception as e:
+        print("DELETE USER ERROR:", str(e))
+
+        return jsonify({
+            "message": "Error deleting user"
+        }), 500
+
+
 
 
 with app.app_context():

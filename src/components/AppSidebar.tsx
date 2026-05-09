@@ -6,7 +6,8 @@ import {
   Leaf,
   MessageCircle,
   CalendarDays,
-  Calculator
+  Calculator,
+  History
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,6 +31,11 @@ const items = [
     title: "Macro Calculator",
     url: "/macro-calculator",
     icon: Calculator,
+  },
+  {
+    title: "Macro History",
+    url: "/macro-history",
+    icon: History,
   },
 ];
 
