@@ -65,24 +65,33 @@ function Onboarding() {
               console.log("Submitting:", userData);
               localStorage.setItem("userData", JSON.stringify(userData));
 
-              fetch("http://127.0.0.1:5000/save-user", {
-                method: "POST",
+              fetch(
+                `http://127.0.0.1:5000/update-user/${localStorage.getItem("user_id")}`,
+                {
+                  method: "PUT",
 
-                headers: {
-                  "Content-Type": "application/json",
-                },
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
 
-                body: JSON.stringify(userData),
-              })
+                  body: JSON.stringify(userData),
+                }
+              )
                 .then((res) => res.json())
+
                 .then((data) => {
+
                   console.log(data);
 
-                  navigate({ to: "/dashboard" });
+                  navigate({
+                    to: "/dashboard",
+                  });
+
                 })
                 .catch((err) => {
                   console.error(err);
                 });
+              navigate({ to: "/dashboard" });
             }}
             className="rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-card)]"
           >

@@ -19,10 +19,16 @@ export function Navbar() {
           <Link to="/chat" className="text-sm text-muted-foreground transition-colors hover:text-foreground">AI Chat</Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">Log in</Button>
-          <Button size="sm" asChild>
-            <Link to="/onboarding">Sign up</Link>
-          </Button>
+          <Link to="/login">
+            <Button>
+              Login
+            </Button>
+          </Link>
+          <Link to="/signup">
+            <Button>
+              Signup
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

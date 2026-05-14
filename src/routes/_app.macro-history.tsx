@@ -21,7 +21,15 @@ function MacroHistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/macro-history")
+    fetch(
+      "http://127.0.0.1:5000/macro-history",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         setHistory(data);
@@ -112,7 +120,6 @@ function MacroHistoryPage() {
           </thead>
 
           <tbody>
-
             {history.map((entry) => (
 
               <tr

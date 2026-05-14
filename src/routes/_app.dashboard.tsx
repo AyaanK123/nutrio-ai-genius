@@ -43,32 +43,77 @@ function Stat({ icon: Icon, label, value, hint }: { icon: any; label: string; va
 }
 
 function Dashboard() {
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-
+  // const userData = JSON.parse(
+  //   localStorage.getItem("userData") || "{}"
+  // );
+  const [userData, setUserData] = useState<any>(null);
   const [macroData, setMacroData] = useState<any>({
     calories: 0,
     protein: 0,
     carbs: 0,
     fats: 0,
   });
+  const [macroLoaded, setMacroLoaded] =
+    useState(false);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/calculate-macros", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    })
+    console.log("CURRENT USER FETCH RUNNING");
+
+    fetch(
+      "http://127.0.0.1:5000/current-user",
+      {
+        method: "GET",
+
+        headers: {
+          Authorization:
+            `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    )
       .then((res) => res.json())
+
       .then((data) => {
-        setMacroData(data);
-      })
-      .catch((err) => {
-        console.error(err);
+
+        setUserData(data);
+
       });
+
   }, []);
 
+
+  useEffect(() => {
+
+    if (!userData || macroLoaded) return;
+
+    fetch(
+      "http://127.0.0.1:5000/calculate-macros",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization:
+            `Bearer ${localStorage.getItem("token")}`,
+        },
+
+        body: JSON.stringify(userData),
+      }
+    )
+      .then((res) => res.json())
+
+      .then((data) => {
+
+        setMacroData(data);
+        setMacroLoaded(true);
+
+      });
+
+  }, [userData]);
+
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   const calculateCalories = () => {
     const weight = Number(userData.weight);
@@ -83,7 +128,8 @@ function Dashboard() {
     return Math.round(bmr * 1.5); // activity factor
   };
 
-const calories = calculateCalories();
+  const calories = calculateCalories();
+  
   return (
     <div className="space-y-6">
       <div>

@@ -31,7 +31,7 @@ db = SQLAlchemy(app)
 CORS(
     app,
     resources={r"/*": {"origins": "*"}},
-    supports_credentials=True
+    allow_headers=["Content-Type", "Authorization"],
 )
 # 🔑 Your API key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -65,6 +65,11 @@ class User(db.Model):
         db.String(255),
         nullable=False
     )
+    macro_history = db.relationship(
+        "MacroHistory",
+        backref="user",
+        lazy=True
+    )
 
 
 class MacroHistory(db.Model):
@@ -83,6 +88,11 @@ class MacroHistory(db.Model):
     created_at = db.Column(
         db.DateTime,
         default=db.func.current_timestamp()
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
     )
 
 
@@ -338,7 +348,7 @@ def login():
 
         # 🎟️ Create JWT token
         access_token = create_access_token(
-            identity=user.id
+            identity=str(user.id)
         )
 
         return jsonify({
@@ -356,7 +366,57 @@ def login():
             "message": "Login failed"
         }), 500
 
+@app.route("/current-user", methods=["GET"])
+@jwt_required()
+def current_user():
 
+    try:
+
+        print("CURRENT USER ROUTE HIT")
+
+        current_user_id = get_jwt_identity()
+
+        print("JWT ID:", current_user_id)
+
+        user = User.query.get(
+            int(current_user_id)
+        )
+
+        print("USER:", user)
+
+        if not user:
+            return jsonify({
+                "message": "User not found"
+            }), 404
+
+        return jsonify({
+            "id": user.id,
+
+            "email": user.email,
+
+            "age": user.age,
+
+            "gender": user.gender,
+
+            "height": user.height,
+
+            "weight": user.weight,
+
+            "activity": user.activity,
+
+            "goal": user.goal,
+
+            "dietary_preference":
+                user.dietary_preference,
+        })
+
+    except Exception as e:
+
+        print("CURRENT USER ERROR:", str(e))
+
+        return jsonify({
+            "message": "Error fetching user"
+        }), 500
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -486,9 +546,12 @@ def weekly_plan():
 
 
 @app.route("/calculate-macros", methods=["POST"])
+@jwt_required()
 def calculate_macros():
+    print("HEADERS:", request.headers)
     try:
         data = request.json
+        current_user_id = get_jwt_identity()
 
         weight = float(data.get("weight") or 70)
 
@@ -532,6 +595,7 @@ def calculate_macros():
             fats=round(fats),
 
             goal=goal,
+            user_id=int(current_user_id),
         )
 
         db.session.add(macro_entry)
@@ -559,9 +623,14 @@ def calculate_macros():
 
 
 @app.route("/macro-history", methods=["GET"])
+@jwt_required()
 def get_macro_history():
     try:
-        history = MacroHistory.query.all()
+        current_user_id = get_jwt_identity()
+
+        history = MacroHistory.query.filter_by(
+            user_id=int(current_user_id)
+        ).all()
 
         history_data = []
 
