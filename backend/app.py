@@ -25,7 +25,10 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///nutriai.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///nutriai.db"
+)
 db = SQLAlchemy(app)
 
 CORS(
