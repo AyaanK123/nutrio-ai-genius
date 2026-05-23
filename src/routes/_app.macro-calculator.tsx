@@ -32,7 +32,7 @@ function MacroCalculatorPage() {
       setLoading(true);
 
       const res = await fetch(
-        "http://127.0.0.1:5000/calculate-macros",
+        "https://nutrio-ai-genius-1.onrender.com/calculate-macros",
         {
           method: "POST",
           headers: {

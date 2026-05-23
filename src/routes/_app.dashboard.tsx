@@ -60,7 +60,7 @@ function Dashboard() {
     console.log("CURRENT USER FETCH RUNNING");
 
     fetch(
-      "http://127.0.0.1:5000/current-user",
+      "https://nutrio-ai-genius-1.onrender.com/current-user",
       {
         method: "GET",
 
@@ -86,7 +86,7 @@ function Dashboard() {
     if (!userData || macroLoaded) return;
 
     fetch(
-      "http://127.0.0.1:5000/calculate-macros",
+      "https://nutrio-ai-genius-1.onrender.com/calculate-macros",
       {
         method: "POST",
 
