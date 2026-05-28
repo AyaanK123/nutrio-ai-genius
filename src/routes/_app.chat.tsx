@@ -37,7 +37,7 @@ function ChatPage() {
 
     try {
       // 🤖 Send to backend
-      const res = await fetch("http://localhost:5000/chat", {
+      const res = await fetch("https://nutrio-ai-genius-1.onrender.com/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
