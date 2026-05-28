@@ -15,7 +15,7 @@ function Profile() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/users")
+    fetch("https://nutrio-ai-genius-1.onrender.com/users")
       .then((res) => res.json())
       .then((data) => {
 
@@ -44,7 +44,7 @@ function Profile() {
     console.log("Saving profile...", formData);
     try {
       const res = await fetch(
-        `http://127.0.0.1:5000/update-user/${user.id}`,
+        `https://nutrio-ai-genius-1.onrender.com/update-user/${user.id}`,
         {
           method: "PUT",
 

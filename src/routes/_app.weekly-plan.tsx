@@ -16,7 +16,7 @@ function WeeklyPlanPage() {
         );
         setLoading(true);
         const res = await fetch(
-        "http://127.0.0.1:5000/weekly-plan",
+        "https://nutrio-ai-genius-1.onrender.com/weekly-plan",
         {
             method: "POST",
             headers: {

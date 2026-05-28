@@ -83,7 +83,7 @@ function MealPlan() {
     }
 
     // 🚫 DO NOT crash if backend fails
-    fetch("http://localhost:5000/generate-meal-plan", {
+    fetch("https://nutrio-ai-genius-1.onrender.com/generate-meal-plan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

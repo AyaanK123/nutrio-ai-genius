@@ -66,7 +66,7 @@ function Onboarding() {
               localStorage.setItem("userData", JSON.stringify(userData));
 
               fetch(
-                `http://127.0.0.1:5000/update-user/${localStorage.getItem("user_id")}`,
+                `https://nutrio-ai-genius-1.onrender.com/update-user/${localStorage.getItem("user_id")}`,
                 {
                   method: "PUT",
 

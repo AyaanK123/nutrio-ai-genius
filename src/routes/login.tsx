@@ -25,7 +25,7 @@ function LoginPage() {
       setLoading(true);
 
       const res = await fetch(
-        "http://127.0.0.1:5000/login",
+        "https://nutrio-ai-genius-1.onrender.com/login",
         {
           method: "POST",
 
